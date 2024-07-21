@@ -6,8 +6,12 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from users.models import Merchant, User
-from users.serializers import MerchantSerializer, StaffUserSerializer, UserSerializer
+from users.models import Client, Merchant, User
+from users.serializers import (
+    ClientSerializer,
+    MerchantSerializer,
+    StaffUserSerializer,
+)
 from utils.permissions import IsAdminUser
 
 
@@ -25,7 +29,6 @@ class UserDetailView(APIView):
 
 
 class Merchants(APIView):
-    serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request):
@@ -53,6 +56,36 @@ class Merchants(APIView):
         merchant.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+class Clients(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        clients = Client.objects.all()
+        serializer = ClientSerializer(clients, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = ClientSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk):
+        client = get_object_or_404(Client, pk=pk)
+        serializer = ClientSerializer(client, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        client = get_object_or_404(Client, pk=pk)
+        client.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class ExchangeToken(APIView):
     def post(self, request, *args, **kwargs):
         try:
@@ -60,7 +93,7 @@ class ExchangeToken(APIView):
             redirect_uri = request.data.get("redirect_uri")
             code_verifier = request.data.get("code_verifier")
 
-            if not code or not redirect_uri or not code_verifier:
+            if not all([code, redirect_uri, code_verifier]):
                 return Response(
                     {"error": "Missing code, redirect_uri, or code_verifier"},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -80,8 +113,7 @@ class ExchangeToken(APIView):
 
             if response.status_code == 200:
                 return Response(response.json())
-            else:
-                return Response(response.json(), status=response.status_code)
+            return Response(response.json(), status=response.status_code)
 
         except requests.exceptions.RequestException as e:
             return Response(

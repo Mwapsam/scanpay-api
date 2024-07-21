@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Merchant, User
+from .models import Client, Merchant, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -26,6 +26,13 @@ class MerchantSerializer(serializers.ModelSerializer):
         )
         return user
 
+class ClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields = "__all__"
+        extra_kwargs = {
+            "password": {"write_only": True},
+        }
 
 class StaffUserSerializer(serializers.ModelSerializer):
     class Meta:
