@@ -53,36 +53,6 @@ class Merchants(APIView):
         merchant.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class GenerateToken(APIView):
-    def post(self, request, *args, **kwargs):
-        try:
-            response = requests.post(
-                f"{settings.BASE_URL}/o/token/",
-                data={
-                    "grant_type": "password",
-                    "username": request.data["email"],
-                    "password": request.data["password"],
-                    "client_id": settings.CLIENT_ID,
-                    "client_secret": settings.CLIENT_SECRET,
-                },
-            )
-
-            if response.status_code == 200:
-                return Response(response.json())
-            else:
-                return Response(response.json(), status=response.status_code)
-
-        except requests.exceptions.RequestException as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-        except KeyError as e:
-            return Response(
-                {"error": f"Missing parameter: {e}"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-
 class ExchangeToken(APIView):
     def post(self, request, *args, **kwargs):
         try:
