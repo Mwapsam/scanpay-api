@@ -1,7 +1,11 @@
-from datetime import timedelta
+import os
 from pathlib import Path
+import environ
+
+env = environ.Env()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 
 SECRET_KEY = "django-insecure-pt6b@2g5ex)mo%q4_!_+(va-+-jki3tsi9l7_&bftjo8d$3&91"
@@ -20,13 +24,14 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "corsheaders",
-    "rest_framework_simplejwt.token_blacklist",
+    "oauth2_provider",
     "users",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "oauth2_provider.middleware.OAuth2TokenMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -90,31 +95,39 @@ USE_TZ = True
 
 
 STATIC_URL = "static/"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "users.User"
 
+LOGIN_URL = "/admin/login/"
+
 CORS_ALLOWED_ORIGINS = [
-  "http://localhost:5173",  
+    "http://localhost:5173",
 ]
 
-CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "users.auth.CustomJWTAuthentication", 
+        "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
+        "rest_framework.authentication.SessionAuthentication",
     )
 }
 
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-    'BLACKLIST_AFTER_ROTATION': True,
-
-    "AUTH_COOKIE": "access_token",  
-    "AUTH_COOKIE_DOMAIN": None,  
-    "AUTH_COOKIE_SECURE": False,
-    "AUTH_COOKIE_HTTP_ONLY": True, 
-    "AUTH_COOKIE_PATH": "/",  
-    "AUTH_COOKIE_SAMESITE": "Lax", 
+OAUTH2_PROVIDER = {
+    "ACCESS_TOKEN_EXPIRE_SECONDS": 36000,
+    "AUTHORIZATION_CODE_EXPIRE_SECONDS": 300,
+    "REFRESH_TOKEN_EXPIRE_SECONDS": 86400,
+    "ROTATE_REFRESH_TOKEN": True,
+    "SCOPES": {
+        "read": "Read scope",
+        "write": "Write scope",
+        "groups": "Access your groups",
+    },
 }
+
+BASE_URL = env("BASE_URL")
+CLIENT_SECRET = env("CLIENT_SECRET")
+CLIENT_ID = env("CLIENT_ID")

@@ -20,3 +20,11 @@ __pycache__/
 *$py.class
 .DS_Store
 .vscode/
+users/__pycache__/apps.cpython-312.pyc
+users/__pycache__/admin.cpython-312.pyc
+users/__pycache__/views.cpython-312.pyc
+users/__pycache__/urls.cpython-312.pyc
+users/__pycache__/models.cpython-312.pyc
+users/__pycache__/auth.cpython-312.pyc
+scanpay/__pycache__/settings.cpython-312.pyc
+scanpay/__pycache__/urls.cpython-312.pyc

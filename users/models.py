@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-
+import uuid
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -27,8 +27,9 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
-    username = None
-    email = models.EmailField(unique=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email = models.EmailField(unique=True, db_index=True)
+    qr_code = models.ImageField(upload_to="qr_codes/", blank=True, null=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -40,9 +41,7 @@ class User(AbstractUser):
         CLIENT = "CLIENT", "Client"
         MERCHANT = "MERCHANT", "Merchant"
 
-    base_role = Role.CLIENT
-
-    role = models.CharField(max_length=10, choices=Role.choices, default=base_role)
+    role = models.CharField(max_length=10, choices=Role.choices, default=Role.CLIENT)
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -50,9 +49,9 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
 
-class ClientManager(models.Manager):
-    def get_queryset(self, *args, **kwargs):
-        return super().get_queryset(*args, **kwargs).filter(role=User.Role.CLIENT)
+class ClientManager(UserManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(role=User.Role.CLIENT)
 
 
 class Client(User):
@@ -66,12 +65,12 @@ class Client(User):
 
     @classmethod
     def all_clients(cls):
-        return User.objects.filter(role=User.Role.CLIENT, is_active=True).count()
+        return cls.objects.filter(is_active=True).count()
 
 
-class MerchantManager(models.Manager):
-    def get_queryset(self, *args, **kwargs):
-        return super().get_queryset(*args, **kwargs).filter(role=User.Role.MERCHANT)
+class MerchantManager(UserManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(role=User.Role.MERCHANT)
 
 
 class Merchant(User):
@@ -85,4 +84,4 @@ class Merchant(User):
 
     @classmethod
     def all_merchants(cls):
-        return User.objects.filter(role=User.Role.MERCHANT, is_active=True).count()
+        return cls.objects.filter(is_active=True).count()

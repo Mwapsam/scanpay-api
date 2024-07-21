@@ -5,8 +5,11 @@ from rest_framework.authentication import CSRFCheck
 from rest_framework import exceptions
 
 
+def dummy_get_response(request):
+    return None
+
 def enforce_csrf(request):
-    check = CSRFCheck()
+    check = CSRFCheck(dummy_get_response)
     check.process_request(request)
     reason = check.process_view(request, None, (), {})
     if reason:
