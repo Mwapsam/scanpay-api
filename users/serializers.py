@@ -8,6 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["id", "email", "role", "is_active"]
         read_only_fields = ["id"]
 
+
 class MerchantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Merchant
@@ -25,6 +26,15 @@ class MerchantSerializer(serializers.ModelSerializer):
             username=validated_data.get("username", ""),
         )
         return user
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        if "date_joined" in representation:
+            representation["date_joined"] = instance.date_joined.strftime("%Y-%m-%d")
+
+        return representation
+
 
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:

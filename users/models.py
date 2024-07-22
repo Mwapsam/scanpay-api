@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 import uuid
 
+
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -84,4 +85,4 @@ class Merchant(User):
 
     @classmethod
     def all_merchants(cls):
-        return cls.objects.filter(is_active=True).count()
+        return cls.objects.all()

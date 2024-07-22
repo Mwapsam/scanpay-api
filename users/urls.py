@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ExchangeToken, Merchants, StaffUsers, UserDetailView
+from .views import Clients, ExchangeToken, Merchants, StaffUsers, UserDetailView
 
 
 urlpatterns = [
@@ -9,4 +9,6 @@ urlpatterns = [
     path("merchants/<uuid:pk>/", Merchants.as_view(), name="merchants-detail"),
     path("staff-users/", StaffUsers.as_view(), name="staff-users"),
     path("staff-users/<uuid:pk>/", StaffUsers.as_view(), name="staff-users-detail"),
+    path("clients/", Clients.as_view(), name="clients"),
+    path("clients/<uuid:pk>/", StaffUsers.as_view(), name="clients-detail"),
 ]

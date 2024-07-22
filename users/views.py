@@ -32,7 +32,7 @@ class Merchants(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request):
-        merchants = Merchant.objects.all()
+        merchants = Merchant.all_merchants()
         serializer = MerchantSerializer(merchants, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -44,6 +44,14 @@ class Merchants(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk):
+        merchant = get_object_or_404(Merchant, pk=pk)
+        serializer = MerchantSerializer(merchant, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
         merchant = get_object_or_404(Merchant, pk=pk)
         serializer = MerchantSerializer(merchant, data=request.data, partial=True)
         if serializer.is_valid():
@@ -73,6 +81,14 @@ class Clients(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk):
+        client = get_object_or_404(Client, pk=pk)
+        serializer = ClientSerializer(client, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
         client = get_object_or_404(Client, pk=pk)
         serializer = ClientSerializer(client, data=request.data, partial=True)
         if serializer.is_valid():
@@ -142,6 +158,14 @@ class StaffUsers(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk):
+        user = get_object_or_404(User, pk=pk, is_staff=True)
+        serializer = StaffUserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
         user = get_object_or_404(User, pk=pk, is_staff=True)
         serializer = StaffUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
