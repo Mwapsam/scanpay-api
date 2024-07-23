@@ -45,8 +45,8 @@ ROOT_URLCONF = "scanpay.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
-        "APP_DIRS": True,
+        "DIRS": ["templates"],
+        "DIRS": [BASE_DIR / "templates"],
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
@@ -102,7 +102,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "users.User"
 
-LOGIN_URL = "/admin/login/"
+LOGIN_URL = "/accounts/login/"
+# LOGIN_REDIRECT_URL = "/"
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
