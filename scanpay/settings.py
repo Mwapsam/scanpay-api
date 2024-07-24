@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "oauth2_provider",
+    "anymail",
     "users",
 ]
 
@@ -75,6 +76,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": 9,
+        },
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -131,3 +135,5 @@ OAUTH2_PROVIDER = {
 BASE_URL = env("BASE_URL")
 CLIENT_SECRET = env("CLIENT_SECRET")
 CLIENT_ID = env("CLIENT_ID")
+
+MAILTRAP_TOKEN = env("MAILTRAP_TOKEN")

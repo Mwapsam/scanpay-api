@@ -1,5 +1,13 @@
 from django.urls import path
-from .views import Clients, ExchangeToken, Merchants, StaffUsers, UserDetailView
+from .views import (
+    Clients,
+    ExchangeToken,
+    Merchants,
+    PasswordResetRequestView,
+    PasswordResetView,
+    StaffUsers,
+    UserDetailView,
+)
 
 
 urlpatterns = [
@@ -11,4 +19,14 @@ urlpatterns = [
     path("staff-users/<uuid:pk>/", StaffUsers.as_view(), name="staff-users-detail"),
     path("clients/", Clients.as_view(), name="clients"),
     path("clients/<uuid:pk>/", StaffUsers.as_view(), name="clients-detail"),
+    path(
+        "password-reset-request/",
+        PasswordResetRequestView.as_view(),
+        name="password_reset_request",
+    ),
+    path(
+        "password-reset-confirm/",
+        PasswordResetView.as_view(),
+        name="password_reset_confirm",
+    ),
 ]
