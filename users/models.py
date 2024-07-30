@@ -185,4 +185,4 @@ class Merchant(User):
 
     @classmethod
     def all_merchants(cls):
-        return cls.objects.all()
+        return cls.objects.select_related("company")

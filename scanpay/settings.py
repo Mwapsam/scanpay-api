@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "oauth2_provider",
     "anymail",
     "users",
+    "sales",
 ]
 
 MIDDLEWARE = [
@@ -97,7 +98,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATIC_URL = "static/"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
@@ -117,13 +118,19 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
         "rest_framework.authentication.SessionAuthentication",
-    )
+    ),
+    # "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "oauth2_provider.backends.OAuth2Backend",
+)
+
 OAUTH2_PROVIDER = {
-    "ACCESS_TOKEN_EXPIRE_SECONDS": 36000,
+    "ACCESS_TOKEN_EXPIRE_SECONDS": 300,
     "AUTHORIZATION_CODE_EXPIRE_SECONDS": 300,
-    "REFRESH_TOKEN_EXPIRE_SECONDS": 86400,
+    "REFRESH_TOKEN_EXPIRE_SECONDS": 6000,
     "ROTATE_REFRESH_TOKEN": True,
     "SCOPES": {
         "read": "Read scope",
@@ -132,8 +139,10 @@ OAUTH2_PROVIDER = {
     },
 }
 
+
 BASE_URL = env("BASE_URL")
 CLIENT_SECRET = env("CLIENT_SECRET")
 CLIENT_ID = env("CLIENT_ID")
-
+CLIENT_URL = env("CLIENT_URL")
 MAILTRAP_TOKEN = env("MAILTRAP_TOKEN")
+CLIENT_IDENTIFIER = env("CLIENT_IDENTIFIER")

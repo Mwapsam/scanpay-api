@@ -69,8 +69,15 @@
       background-color: #0056b3;
     }
 
-    .csrf-token {
-      display: none;
+    .error-message {
+      color: #d9534f;
+      margin-top: 0.5rem;
+    }
+    
+    .non-field-errors {
+      color: #d9534f;
+      margin-bottom: 1rem;
+      text-align: center;
     }
   </style>
 </head>
@@ -79,13 +86,36 @@
     <h2>Log In</h2>
     <form method="post">
       {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="non-field-errors">
+          {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
       <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" required>
+        <label for="email">Email</label>
+        <input type="text" id="email" name="username" required>
+        {% if form.username.errors %}
+          <div class="error-message">
+            {% for error in form.username.errors %}
+            {{form.username}}
+              <!-- <p>{{ error }}</p> -->
+            {% endfor %}
+          </div>
+        {% endif %}
       </div>
       <div class="form-group">
         <label for="password">Password</label>
         <input type="password" id="password" name="password" required>
+        {% if form.password.errors %}
+          <div class="error-message">
+            {% for error in form.password.errors %}
+            {{form.password}}
+              <!-- <p>{{ error }}</p> -->
+            {% endfor %}
+          </div>
+        {% endif %}
       </div>
       <button type="submit">Log In</button>
     </form>

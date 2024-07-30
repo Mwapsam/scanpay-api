@@ -1,4 +1,3 @@
-import uuid
 from django.core.management.base import BaseCommand
 from django.utils.crypto import get_random_string
 from users.models import Client, Merchant, User
@@ -16,8 +15,8 @@ class Command(BaseCommand):
 
     def generate_users(self, user_class, prefix, count, is_staff=False, role=None):
         for i in range(count):
-            email = f"{prefix}{i + 1}@example.com"
-            username = f"{prefix}{i + 1}"
+            email = f"{prefix}{i + 133}@example.com"
+            username = f"{prefix}{i + 133}"
             password = "password123"
             user = user_class.objects.create_user(
                 email=email,
