@@ -1,7 +1,18 @@
 import uuid
+import random
+import string
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from ledger.models import LedgerEntry
 from users.models import Client, Merchant
+
+
+class PaymentMethods(models.TextChoices):
+    MTN_MONEY = "MTN_MONEY", _("Mtn")
+    AIRTEL = "AIRTEL_MONEY", _("Airtel")
+    ZAMTEL = "ZAMTEL_KWACHA", _("Zamtel")
+    CREDIT_CARD = "CREDIT_CARD", _("Credit Card")
 
 
 class PaymentMethods(models.TextChoices):
@@ -50,6 +61,36 @@ class Transaction(models.Model):
             models.Index(fields=["payment_method"], name="payment_method_idx"),
             models.Index(fields=["-transaction_date"], name="transaction_date_idx"),
         ]
+
+    def generate_reference_number(self):
+        """Generate a unique reference number."""
+        now = timezone.now().strftime("%Y%m%d%H%M%S")
+        random_str = "".join(
+            random.choices(string.ascii_uppercase + string.digits, k=6)
+        )
+        return f"TXN-{now}-{random_str}"
+
+    def save(self, *args, **kwargs):
+        if not self.reference_number:
+            self.reference_number = self.generate_reference_number()
+        super().save(*args, **kwargs)
+        description = (
+            f"Transaction {self.reference_number} - {self.get_payment_method_display()}"
+        )
+        if self.status == self.STATUS_COMPLETED:
+            LedgerEntry.objects.create(
+                transaction=self,
+                description=description,
+                debit=self.amount,  # Amount paid by client
+                credit=0.00,  # No credit for a completed transaction
+            )
+        elif self.status == self.STATUS_FAILED:
+            LedgerEntry.objects.create(
+                transaction=self,
+                description=description,
+                debit=0.00,
+                credit=self.amount,  # Refund or unsuccessful payment
+            )
 
 
 class Invoice(models.Model):

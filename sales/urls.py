@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import (
     DailyAnalyticsView,
+    ExportInvoicesToExcel,
+    MonthlyTrafficSalesView,
     TransactionListCreateAPIView,
     TransactionDetailAPIView,
     InvoiceListCreateAPIView,
@@ -26,5 +28,15 @@ urlpatterns = [
         "weekly-active-users/",
         WeeklyActiveUsersView.as_view(),
         name="weekly-active-users",
+    ),
+    path(
+        "monthly-traffic-sales/",
+        MonthlyTrafficSalesView.as_view(),
+        name="monthly-traffic-sales",
+    ),
+    path(
+        "export-invoices/",
+        ExportInvoicesToExcel.as_view(),
+        name="export_invoices_to_excel",
     ),
 ]

@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import environ
+from corsheaders.defaults import default_headers
 
 env = environ.Env()
 
@@ -22,12 +23,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    #Installed Apps
     "rest_framework",
     "corsheaders",
     "oauth2_provider",
     "anymail",
+    #Custom Apps
     "users",
     "sales",
+    "ledger",
+    "app_api",
 ]
 
 MIDDLEWARE = [
@@ -111,6 +116,10 @@ LOGIN_URL = "/accounts/login/"
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+]
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "x-client-identifier",
 ]
 
 

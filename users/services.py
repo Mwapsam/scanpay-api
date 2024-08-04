@@ -36,6 +36,8 @@ class UserService:
         return {
             "username": user.username,
             "email": user.email,
+            "company": user.company,
+            "role": user.role,
         }
 
 
@@ -70,7 +72,7 @@ class MerchantService:
 
     @staticmethod
     def create_merchant(
-        email, password, first_name, last_name, username, is_active, ip_address
+        email, password, first_name, last_name, username, is_active, ip_address, role
     ):
         merchant = Merchant.objects.create(
             email=email,
@@ -80,7 +82,7 @@ class MerchantService:
             username=username,
             is_active=is_active,
             ip_address=ip_address,
-            role="MERCHANT",
+            role=role,
         )
         return merchant
 

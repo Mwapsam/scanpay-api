@@ -1,4 +1,6 @@
 import calendar
+import openpyxl
+from django.http import HttpResponse, JsonResponse
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -7,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from users.models import Client, User
 from .models import Transaction, Invoice
 from .serializers import TransactionSerializer, InvoiceSerializer
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.utils import timezone
 
 
@@ -235,10 +237,93 @@ class WeeklyActiveUsersView(APIView):
             User.objects.filter(date_joined__date=date).count() for date in dates
         ]
 
-        days_of_week = list(calendar.day_name)
+        days_of_week = list(calendar.day_abbr)
         data = [
-            {"day": day.lower(), "date": date.strftime("%d %b, %Y"), "users": count}
+            {"day": day, "date": date.strftime("%d %b, %Y"), "users": count}
             for day, date, count in zip(days_of_week, dates, active_users_counts)
         ]
 
         return Response(data)
+
+
+class MonthlyTrafficSalesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        today = timezone.now().date()
+        year_start = today.replace(month=1, day=1)
+        months = [calendar.month_abbr[i] for i in range(1, 13)]
+
+        monthly_data = []
+
+        for month in range(1, 13):
+            start_date = year_start.replace(month=month)
+            end_date = (start_date.replace(day=1) + timedelta(days=32)).replace(day=1)
+
+            transactions = Transaction.objects.filter(
+                transaction_date__date__gte=start_date,
+                transaction_date__date__lt=end_date,
+            )
+
+            sales = (
+                transactions.aggregate(total_sales=Sum("amount"))["total_sales"] or 0
+            )
+            traffic = transactions.count()
+
+            monthly_data.append(
+                {
+                    "month": months[month - 1],
+                    "traffic": traffic,
+                    "sales": sales,
+                }
+            )
+
+        return Response(monthly_data)
+
+
+class ExportInvoicesToExcel(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        invoice_ids = request.data.get('invoice_ids', [])
+        if not invoice_ids:
+            return JsonResponse({'error': 'No invoice IDs provided.'}, status=400)
+
+        invoices = Invoice.objects.filter(id__in=invoice_ids)
+        if not invoices.exists():
+            return JsonResponse({'error': 'No matching invoices found.'}, status=404)
+
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = "Invoices"
+
+        headers = [
+            "Client",
+            "Merchant",
+            "Issue Date",
+            "Due Date",
+            "Total Amount",
+            "Status",
+        ]
+        sheet.append(headers)
+
+        for invoice in invoices:
+            sheet.append(
+                [
+                    str(invoice.client),
+                    str(invoice.merchant),
+                    invoice.issue_date.strftime("%Y-%m-%d %H:%M:%S"),
+                    invoice.due_date.strftime("%Y-%m-%d %H:%M:%S"),
+                    str(invoice.total_amount),
+                    invoice.get_status_display(),
+                ]
+            )
+
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = "attachment; filename=invoices.xlsx"
+
+        workbook.save(response)
+
+        return response
