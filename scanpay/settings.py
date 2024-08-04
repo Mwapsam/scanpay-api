@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import environ
+import dj_database_url
 from corsheaders.defaults import default_headers
 
 env = environ.Env()
@@ -68,12 +69,33 @@ TEMPLATES = [
 WSGI_APPLICATION = "scanpay.wsgi.application"
 
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
+default_database = {
+    "ENGINE": os.environ.get("POSTGRES_ENGINE", "django.db.backends.sqlite3"),
+    "NAME": os.environ.get(
+        "POSTGRES_NAME", os.path.join(BASE_DIR, BASE_DIR / "db.sqlite3")
+    ),
+    "USER": os.environ.get("POSTGRES_USER", None),
+    "PASSWORD": os.environ.get("POSTGRES_PASSWORD", None),
+    "HOST": os.environ.get("POSTGRES_HOST", None),
+    "PORT": os.environ.get("POSTGRES_PORT", None),
 }
+
+postgres_url = os.environ.get(
+    "POSTGRES_URL",
+    "postgres://default:03mZLFHhWwyq@ep-lucky-cloud-a4fxbtiw-pooler.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require",
+)
+
+if postgres_url:
+    DATABASES = {"default": dj_database_url.parse(postgres_url)}
+else:
+    DATABASES = {"default": default_database}
 
 
 AUTH_PASSWORD_VALIDATORS = [
